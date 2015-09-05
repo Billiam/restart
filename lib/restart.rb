@@ -117,27 +117,22 @@ process = Process.detach(spawn(options[:command]))
 
 begin
   require 'win32api'
-  ctrl_c = Win32API.new('Kernel32', 'GenerateConsoleCtrlEvent', 'II', 'I')
-  killer = proc do
-    ctrl_c.call(0, 0)
-    sleep 0.1
-    if process.alive?
-      Process.kill(:KILL, process.pid)
-    end
-  end
   clear = proc do
     system 'cls'
   end
 rescue LoadError
-  killer = proc do
-    Process.kill(:INT, -Process.getpgrp)
+  clear = proc do
+    system 'clear'
+  end
+end
+
+killer = proc do
+  if process.alive?
+    Process.kill(:INT, process.pid)
     sleep 0.1
     if process.alive?
       Process.kill(:KILL, process.pid)
     end
-  end
-  clear = proc do
-    system 'clear'
   end
 end
 
